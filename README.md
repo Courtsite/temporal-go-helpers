@@ -84,8 +84,8 @@ var signal SignalStruct
 
 s := workflow.NewSelector(ctx)
 
-s.AddFuture(timeout, func(f Future) {})
-s.AddReceive(sigCh, func(c Channel, more bool) {
+s.AddFuture(timeout, func(f workflow.Future) {})
+s.AddReceive(sigCh, func(c workflow.ReceiveChannel, more bool) {
     c.Receive(ctx, &signal)
 })
 
