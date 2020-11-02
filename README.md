@@ -1,6 +1,7 @@
 # temporal-go-helpers
 
 [![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/courtsite/temporal-go-helpers)](https://pkg.go.dev/mod/github.com/courtsite/temporal-go-helpers)
+[![CI](https://github.com/courtsite/temporal-go-helpers/workflows/CI/badge.svg)](https://github.com/Courtsite/temporal-go-helpers/actions?query=workflow%3ACI)
 
 
 🔃 Common convenience methods, and developer ergonomics for [Temporal's](https://github.com/temporalio/temporal/) [Go SDK](https://github.com/temporalio/sdk-go).
