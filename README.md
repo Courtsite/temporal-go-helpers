@@ -1,6 +1,6 @@
 # temporal-go-helpers
 
-[![PkgGoDev](https://pkg.go.dev/badge/courtsite/temporal-go-helpers)](https://pkg.go.dev/courtsite/temporal-go-helpers)
+[![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/courtsite/temporal-go-helpers)](https://pkg.go.dev/mod/github.com/courtsite/temporal-go-helpers)
 
 
 🔃 Common convenience methods, and developer ergonomics for Temporal's Go SDK.
