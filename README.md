@@ -3,7 +3,7 @@
 [![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/courtsite/temporal-go-helpers)](https://pkg.go.dev/mod/github.com/courtsite/temporal-go-helpers)
 
 
-🔃 Common convenience methods, and developer ergonomics for Temporal's Go SDK.
+🔃 Common convenience methods, and developer ergonomics for [Temporal's](https://github.com/temporalio/temporal/) [Go SDK](https://github.com/temporalio/sdk-go).
 
 _This is still under development. Use at your own risk._
 
@@ -63,7 +63,7 @@ if err != nil {
 // Both reservations succeeded.
 ```
 
-It is worth noting that in simpler examples like above, we do not necessarily need or benefit from the Saga helper this module provides. We can simply call `workflow.ExecuteActivity(..)` within the `if err != nil` block. But, for more complex examples, it can become quite unmanageable, and in such cases, it is often easier to call `saga.Compensate(ctx)`.
+It is worth noting that in simpler examples like above, we do not necessarily need or benefit from the Saga helper this module provides. We can simply call `workflow.ExecuteActivity(..)` within the `if err != nil` block. But, for more complex examples, it can become quite unmanageable, and in such cases, it is often easier to call `saga.Compensate(ctx)`. Your mileage may vary.
 
 The various compensation rollback logic can be executed in parallel by setting `ParallelCompensation` to `true`.
 
