@@ -9,22 +9,26 @@ import (
 func ReceiveWithTimeout(ctx workflow.Context, sigCh workflow.ReceiveChannel, valuePtr interface{}, timeout time.Duration) bool {
 	selector := workflow.NewSelector(ctx)
 
-	var hasTimedOut bool
+	childCtx, cancel := workflow.WithCancel(ctx)
+	defer cancel()
 
 	selector.AddFuture(
-		workflow.NewTimer(ctx, timeout),
-		func(f workflow.Future) {
-			hasTimedOut = true
-		},
+		workflow.NewTimer(childCtx, timeout),
+		func(f workflow.Future) {},
 	)
 	selector.AddReceive(
 		sigCh,
-		func(c workflow.ReceiveChannel, more bool) {
-			c.Receive(ctx, valuePtr)
-		},
+		func(c workflow.ReceiveChannel, more bool) {},
 	)
 
 	selector.Select(ctx)
+
+	var hasTimedOut bool
+	if sigCh.ReceiveAsync(valuePtr) {
+		hasTimedOut = false
+	} else {
+		hasTimedOut = true
+	}
 
 	return hasTimedOut
 }
