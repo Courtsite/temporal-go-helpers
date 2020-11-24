@@ -57,6 +57,7 @@ var flightResID string
 err := workflow.ExecuteActivity(ctx, activities.BookFlight, name).Get(ctx, &flightResID)
 if err != nil {
     // If the flight reservation failed, cancel the hotel.
+    // `saga.Compensate` returns an error, you can check for it and/or log it.
     saga.Compensate(ctx)
     return err
 }
@@ -65,6 +66,8 @@ if err != nil {
 ```
 
 It is worth noting that in simpler examples like above, we do not necessarily need or benefit from the Saga helper this module provides. We can simply call `workflow.ExecuteActivity(..)` within the `if err != nil` block. But, for more complex examples, it can become quite unmanageable, and in such cases, it is often easier to call `saga.Compensate(ctx)`. Your mileage may vary.
+
+The compensation operations are executed in LIFO order.
 
 The various compensation rollback logic can be executed in parallel by setting `ParallelCompensation` to `true`.
 
@@ -100,11 +103,17 @@ import "github.com/courtsite/temporal-go-helpers/channel"
 
 sigCh := workflow.GetSignalChannel(ctx, "signal-with-timeout")
 var signal SignalStruct
-hasTimedOut := channel.ReceiveWithTimeout(ctx, sigCh, &signal, time.Minute * 30)
+res := channel.ReceiveWithTimeout(ctx, sigCh, &signal, time.Minute * 30)
 
-if hasTimedOut {
+if res.IsCancelled {
+    // Do something
+}
+
+if res.HasTimedOut {
     // Do something
 }
 ```
 
 It hides the need to set-up a timer, and selector, reducing cognitive overhead in your workflows.
+
+It also handles context cancellation as well as potential race conditions with the timer future returning at the same time as the signal channel. In the latter scenario, the received signal will be favoured.
