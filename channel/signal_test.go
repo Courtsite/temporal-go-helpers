@@ -35,6 +35,7 @@ func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Succe
 	var result BasicReceiveWithTimeoutWorkflowResult
 	s.NoError(env.GetWorkflowResult(&result))
 	s.False(result.HasTimedOut)
+	s.False(result.IsCancelled)
 	s.Equal("testing", result.Message)
 
 	env.AssertExpectations(s.T())
@@ -57,6 +58,7 @@ func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__NoPayload__Success
 	var result BasicReceiveWithTimeoutWorkflowResult
 	s.NoError(env.GetWorkflowResult(&result))
 	s.False(result.HasTimedOut)
+	s.False(result.IsCancelled)
 	s.Equal("", result.Message)
 
 	env.AssertExpectations(s.T())
@@ -73,7 +75,56 @@ func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Timed
 	var result BasicReceiveWithTimeoutWorkflowResult
 	s.NoError(env.GetWorkflowResult(&result))
 	s.True(result.HasTimedOut)
+	s.False(result.IsCancelled)
 	s.Equal("", result.Message)
+
+	env.AssertExpectations(s.T())
+}
+
+func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Cancelled() {
+	env := s.NewTestWorkflowEnvironment()
+
+	env.RegisterDelayedCallback(
+		func() {
+			env.CancelWorkflow()
+		},
+		time.Minute,
+	)
+	env.ExecuteWorkflow(BasicReceiveWithTimeoutWorkflow__WithPayload)
+
+	s.True(env.IsWorkflowCompleted())
+	s.NoError(env.GetWorkflowError())
+
+	var result BasicReceiveWithTimeoutWorkflowResult
+	s.NoError(env.GetWorkflowResult(&result))
+	s.False(result.HasTimedOut)
+	s.True(result.IsCancelled)
+	s.Equal("", result.Message)
+
+	env.AssertExpectations(s.T())
+}
+
+func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__SignalAfterCancelled() {
+	env := s.NewTestWorkflowEnvironment()
+
+	env.RegisterDelayedCallback(
+		func() {
+			env.CancelWorkflow()
+			message := "testing"
+			env.SignalWorkflow("signal-receive-with-timeout", &message)
+		},
+		time.Minute,
+	)
+	env.ExecuteWorkflow(BasicReceiveWithTimeoutWorkflow__WithPayload)
+
+	s.True(env.IsWorkflowCompleted())
+	s.NoError(env.GetWorkflowError())
+
+	var result BasicReceiveWithTimeoutWorkflowResult
+	s.NoError(env.GetWorkflowResult(&result))
+	s.False(result.HasTimedOut)
+	s.False(result.IsCancelled)
+	s.Equal("testing", result.Message)
 
 	env.AssertExpectations(s.T())
 }
