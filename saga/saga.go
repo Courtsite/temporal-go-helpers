@@ -125,7 +125,8 @@ func compensate(ctx Context, sagaState *sagaState) error {
 			return compensationError
 		}
 	} else {
-		for _, op := range sagaState.compensationOps {
+		for i := len(sagaState.compensationOps) - 1; i >= 0; i-- {
+			op := sagaState.compensationOps[i]
 			err := op(ctx)
 			if err != nil && !sagaState.options.ContinueWithError {
 				return err
