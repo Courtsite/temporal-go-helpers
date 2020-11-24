@@ -26,9 +26,14 @@ func BasicSagaWorkflow(ctx workflow.Context, initialAmount int) (int, error) {
 	ca := &CalculatorActivities{}
 
 	currentAmount := initialAmount
+	var compensationOrder []int
 
 	workflow.SetQueryHandler(ctx, "currentAmount", func(input []byte) (int, error) {
 		return currentAmount, nil
+	})
+
+	workflow.SetQueryHandler(ctx, "compensationOrder", func(input []byte) ([]int, error) {
+		return compensationOrder, nil
 	})
 
 	err := workflow.ExecuteActivity(ctx, ca.Add, currentAmount, 10).Get(ctx, &currentAmount)
@@ -38,6 +43,7 @@ func BasicSagaWorkflow(ctx workflow.Context, initialAmount int) (int, error) {
 		return 0, err
 	}
 	AddCompensation(sagaCtx, func(ctx workflow.Context) error {
+		compensationOrder = append(compensationOrder, 5)
 		err := workflow.ExecuteActivity(ctx, ca.Minus, currentAmount, 5).Get(ctx, &currentAmount)
 		if err != nil {
 			logger.Error("compensation activity failed", zap.Error(err))
@@ -53,6 +59,7 @@ func BasicSagaWorkflow(ctx workflow.Context, initialAmount int) (int, error) {
 		return 0, err
 	}
 	AddCompensation(sagaCtx, func(ctx workflow.Context) error {
+		compensationOrder = append(compensationOrder, 10)
 		err := workflow.ExecuteActivity(ctx, ca.Minus, currentAmount, 10).Get(ctx, &currentAmount)
 		if err != nil {
 			logger.Error("compensation activity failed", zap.Error(err))

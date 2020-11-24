@@ -40,6 +40,13 @@ func (s *UnitTestSuite) Test_BasicSagaWorkflow_Success() {
 	s.NoError(err)
 	s.Equal(60, currentAmount)
 
+	result, err = env.QueryWorkflow("compensationOrder")
+	s.NoError(err)
+	var compensationOrder []int
+	err = result.Get(&compensationOrder)
+	s.NoError(err)
+	s.Empty(compensationOrder)
+
 	env.AssertExpectations(s.T())
 }
 
@@ -63,6 +70,13 @@ func (s *UnitTestSuite) Test_BasicSagaWorkflow_Failure() {
 	err = result.Get(&currentAmount)
 	s.NoError(err)
 	s.Equal(15, currentAmount)
+
+	result, err = env.QueryWorkflow("compensationOrder")
+	s.NoError(err)
+	var compensationOrder []int
+	err = result.Get(&compensationOrder)
+	s.NoError(err)
+	s.Equal([]int{10, 5}, compensationOrder)
 
 	env.AssertExpectations(s.T())
 }
