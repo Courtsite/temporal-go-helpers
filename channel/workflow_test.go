@@ -8,6 +8,7 @@ import (
 
 type BasicReceiveWithTimeoutWorkflowResult struct {
 	HasTimedOut bool
+	IsCancelled bool
 	Message     string
 }
 
@@ -18,18 +19,20 @@ func BasicReceiveWithTimeoutWorkflow__WithPayload(ctx workflow.Context) (BasicRe
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
+	// This is to ensure the signal channel gets cleaned up after timing out.
 	childCtx, cancel := workflow.WithCancel(ctx)
 
 	sigCh := workflow.GetSignalChannel(childCtx, "signal-receive-with-timeout")
 	var message string
-	hasTimedOut := ReceiveWithTimeout(ctx, sigCh, &message, time.Minute*30)
+	res := ReceiveWithTimeout(ctx, sigCh, &message, time.Minute*30)
 
-	if hasTimedOut {
+	if res.HasTimedOut {
 		cancel()
 	}
 
 	var result BasicReceiveWithTimeoutWorkflowResult = BasicReceiveWithTimeoutWorkflowResult{
-		HasTimedOut: hasTimedOut,
+		HasTimedOut: res.HasTimedOut,
+		IsCancelled: res.IsCancelled,
 		Message:     message,
 	}
 
@@ -43,17 +46,19 @@ func BasicReceiveWithTimeoutWorkflow__NoPayload(ctx workflow.Context) (BasicRece
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
+	// This is to ensure the signal channel gets cleaned up after timing out.
 	childCtx, cancel := workflow.WithCancel(ctx)
 
 	sigCh := workflow.GetSignalChannel(childCtx, "signal-receive-with-timeout")
-	hasTimedOut := ReceiveWithTimeout(ctx, sigCh, nil, time.Minute*30)
+	res := ReceiveWithTimeout(ctx, sigCh, nil, time.Minute*30)
 
-	if hasTimedOut {
+	if res.HasTimedOut {
 		cancel()
 	}
 
 	var result BasicReceiveWithTimeoutWorkflowResult = BasicReceiveWithTimeoutWorkflowResult{
-		HasTimedOut: hasTimedOut,
+		HasTimedOut: res.HasTimedOut,
+		IsCancelled: res.IsCancelled,
 		Message:     "",
 	}
 
