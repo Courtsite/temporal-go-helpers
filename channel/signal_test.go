@@ -8,16 +8,16 @@ import (
 	"go.temporal.io/sdk/testsuite"
 )
 
-type UnitTestSuite struct {
+type SignalUnitTestSuite struct {
 	suite.Suite
 	testsuite.WorkflowTestSuite
 }
 
-func TestUnitTestSuite(t *testing.T) {
-	suite.Run(t, new(UnitTestSuite))
+func TestSignalUnitTestSuite(t *testing.T) {
+	suite.Run(t, new(SignalUnitTestSuite))
 }
 
-func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Success() {
+func (s *SignalUnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Success() {
 	env := s.NewTestWorkflowEnvironment()
 
 	env.RegisterDelayedCallback(
@@ -41,7 +41,7 @@ func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Succe
 	env.AssertExpectations(s.T())
 }
 
-func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__NoPayload__Success() {
+func (s *SignalUnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__NoPayload__Success() {
 	env := s.NewTestWorkflowEnvironment()
 
 	env.RegisterDelayedCallback(
@@ -64,7 +64,7 @@ func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__NoPayload__Success
 	env.AssertExpectations(s.T())
 }
 
-func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__TimedOut() {
+func (s *SignalUnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__TimedOut() {
 	env := s.NewTestWorkflowEnvironment()
 
 	env.ExecuteWorkflow(BasicReceiveWithTimeoutWorkflow__WithPayload)
@@ -81,7 +81,7 @@ func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Timed
 	env.AssertExpectations(s.T())
 }
 
-func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Cancelled() {
+func (s *SignalUnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Cancelled() {
 	env := s.NewTestWorkflowEnvironment()
 
 	env.RegisterDelayedCallback(
@@ -104,7 +104,7 @@ func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__Cance
 	env.AssertExpectations(s.T())
 }
 
-func (s *UnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__SignalAfterCancelled() {
+func (s *SignalUnitTestSuite) Test_BasicReceiveWithTimeoutWorkflow__WithPayload__SignalAfterCancelled() {
 	env := s.NewTestWorkflowEnvironment()
 
 	env.RegisterDelayedCallback(

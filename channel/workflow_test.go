@@ -64,3 +64,31 @@ func BasicReceiveWithTimeoutWorkflow__NoPayload(ctx workflow.Context) (BasicRece
 
 	return result, nil
 }
+
+func BasicDrainWorkflow(ctx workflow.Context) (int, error) {
+	ao := workflow.ActivityOptions{
+		ScheduleToStartTimeout: time.Minute,
+		StartToCloseTimeout:    time.Minute,
+	}
+	ctx = workflow.WithActivityOptions(ctx, ao)
+
+	sigCh := workflow.GetSignalChannel(ctx, "signal")
+
+	totalDrained := 0
+
+	for {
+		totalDrained += Drain(sigCh)
+
+		var message string
+		sigCh.Receive(ctx, &message)
+
+		if message == "OK" {
+			// Do some processing
+			workflow.Sleep(ctx, time.Second*5)
+		} else if message == "STOP" {
+			break
+		}
+	}
+
+	return totalDrained, nil
+}

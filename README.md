@@ -13,6 +13,7 @@ _This is still under development. Use at your own risk._
 
 - Saga
 - Receive Signal with Timeout
+- Drain Channel
 - Any suggestions? Ping us!
 
 
@@ -117,3 +118,32 @@ if res.HasTimedOut {
 It hides the need to set-up a timer, and selector, reducing cognitive overhead in your workflows.
 
 It also handles context cancellation as well as potential race conditions with the timer future returning at the same time as the signal channel. In the latter scenario, the received signal will be favoured.
+
+
+## Drain Channel
+
+Based on https://community.temporal.io/t/continueasnew-signals/1008.
+
+It is recommended that you drain your channel manually (i.e. do not use this library) if you must handle every signal.
+
+This convenience method is simply for cases where you want to discard all signals. For example, you may have business logic that processes one signal at a time, but during the processing of that signal, you may not want to receive any other signals, perhaps to avoid some potential race conditions. If you do not have the ability to prevent signals from being sent during this time or if there is some likelihood for signals to be sent anyway, for safety, you can use `channel.Drain(ctx, sigCh)` to essentially "reset" the channel before waiting for newer signals to process.
+
+If you are unsure about whether or not you should use this, then do not use it.
+
+Example:
+
+```go
+import "github.com/courtsite/temporal-go-helpers/channel"
+
+sigCh := workflow.GetSignalChannel(ctx, "signal")
+
+for {
+    // Reset, and ensure we only now accept new signals.
+    // `n` will be the number of signals dropped.
+    n := channel.Drain(ctx, sigCh)
+
+    // Wait for, receive, and handle new signal from sigCh
+
+    // Other business logic
+}
+```
