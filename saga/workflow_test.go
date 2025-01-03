@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"go.uber.org/zap"
-
 	"go.temporal.io/sdk/workflow"
 )
 
@@ -44,7 +42,7 @@ func BasicSagaWorkflow(ctx workflow.Context, initialAmount int) (int, error) {
 
 	err = workflow.ExecuteActivity(ctx, ca.Add, currentAmount, 10).Get(ctx, &currentAmount)
 	if err != nil {
-		logger.Error("activity failed", zap.Error(err))
+		logger.Error("activity failed", "error", err)
 		handleSagaErr(ctx, Compensate(sagaCtx))
 		return 0, err
 	}
@@ -52,7 +50,7 @@ func BasicSagaWorkflow(ctx workflow.Context, initialAmount int) (int, error) {
 		compensationOrder = append(compensationOrder, 5)
 		err := workflow.ExecuteActivity(ctx, ca.Minus, currentAmount, 5).Get(ctx, &currentAmount)
 		if err != nil {
-			logger.Error("compensation activity failed", zap.Error(err))
+			logger.Error("compensation activity failed", "error", err)
 			return err
 		}
 		return nil
@@ -60,7 +58,7 @@ func BasicSagaWorkflow(ctx workflow.Context, initialAmount int) (int, error) {
 
 	err = workflow.ExecuteActivity(ctx, ca.Add, currentAmount, 20).Get(ctx, &currentAmount)
 	if err != nil {
-		logger.Error("activity failed", zap.Error(err))
+		logger.Error("activity failed", "error", err)
 		handleSagaErr(ctx, Compensate(sagaCtx))
 		return 0, err
 	}
@@ -68,7 +66,7 @@ func BasicSagaWorkflow(ctx workflow.Context, initialAmount int) (int, error) {
 		compensationOrder = append(compensationOrder, 10)
 		err := workflow.ExecuteActivity(ctx, ca.Minus, currentAmount, 10).Get(ctx, &currentAmount)
 		if err != nil {
-			logger.Error("compensation activity failed", zap.Error(err))
+			logger.Error("compensation activity failed", "error", err)
 			return err
 		}
 		return nil
@@ -76,7 +74,7 @@ func BasicSagaWorkflow(ctx workflow.Context, initialAmount int) (int, error) {
 
 	err = workflow.ExecuteActivity(ctx, ca.Add, currentAmount, 30).Get(ctx, &currentAmount)
 	if err != nil {
-		logger.Error("activity failed", zap.Error(err))
+		logger.Error("activity failed", "error", err)
 		handleSagaErr(ctx, Compensate(sagaCtx))
 		return 0, err
 	}
@@ -111,14 +109,14 @@ func MultipleCompensateSagaWorkflow(ctx workflow.Context, initialAmount int) (in
 
 	err = workflow.ExecuteActivity(ctx, ca.Add, currentAmount, 10).Get(ctx, &currentAmount)
 	if err != nil {
-		logger.Error("activity failed", zap.Error(err))
+		logger.Error("activity failed", "error", err)
 		handleSagaErr(ctx, Compensate(sagaCtx))
 		return 0, err
 	}
 	AddCompensation(sagaCtx, func(ctx workflow.Context) error {
 		err := workflow.ExecuteActivity(ctx, ca.Minus, currentAmount, 5).Get(ctx, &currentAmount)
 		if err != nil {
-			logger.Error("compensation activity failed", zap.Error(err))
+			logger.Error("compensation activity failed", "error", err)
 			return err
 		}
 		return nil
